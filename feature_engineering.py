@@ -41,13 +41,13 @@ def get_chunk_sizes(file):
     #dataset = dataset.replace(np.nan, 0)
     #dataset = dataset.to_numpy()
 
-    df = df[df['Protocol'] == "QUIC"] #only need quic packets bc these are the only packets for the video
+    df = df[df["quic"] == "quic"] #only need quic packets bc these are the only packets for the video
 
     df = df.reset_index(drop=True) #reset df indices after dropping rows
 
-    client = df['Source'][0] #client sends first request to server
+    client = df['ip.src'][0] #client sends first request to server
 
-    df = df[df['Destination'] == client] #only look at packets incoming to the client
+    df = df[df['ip.dst'] == client] #only look at packets incoming to the client
 
     df = df.reset_index(drop=True) #reset df indices after dropping rows
 
@@ -62,17 +62,17 @@ def get_chunk_sizes(file):
     init = 1
     prev_start_time = 0
     for i in range(len(df)):
-        if(df['Info'][i] != "Protected Payload (KP0)"):
+        if("tls" in df['frame.protocols']):
             continue
         else:
             if(prev_start_time == 0):
-                prev_start_time = df['Time'][i]
-            if(df['Time'][i]>prev_start_time + 0.3): #more than 0.3s since last packet, means new chunk
+                prev_start_time = df['frame.time_relative'][i]
+            if(df['frame.time_relative'][i]>prev_start_time + 0.3): #more than 0.3s since last packet, means new chunk
                 chunk_size_data.append(chunk_size)
                 chunk_size = 0
-                prev_start_time = df['Time'][i]
-            chunk_size += int(df['Length'][i])
-            prev_start_time = df['Time'][i]
+                prev_start_time = df['frame.time_relative'][i]
+            chunk_size += int(df['frame.len'][i])
+            prev_start_time = df['frame.time_relative'][i]
 
     chunk_size_data=np.asarray(chunk_size_data)
     #print(chunk_size_data)
