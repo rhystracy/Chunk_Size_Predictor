@@ -15,9 +15,9 @@ class TRANS_Model():
             dropout=0.25,
         )
 
-        self.model.compile(loss=tf.losses.MeanSquaredError(),
+        self.model.compile(loss=tf.losses.MeanAbsoluteError(),
                         optimizer=tf.optimizers.Adam(),
-                        metrics=[tf.metrics.MeanAbsoluteError()])
+                        metrics=[tf.metrics.MeanSquaredError()])
     
     def trans_encoder(self, inputs, head_size, num_heads, ff_dim, dropout=0): #normalize, attention, normalize, feedforward, normalize
         # Normalization and Attention
@@ -58,7 +58,7 @@ class TRANS_Model():
         for dim in mlp_units:
             x = tf.keras.layers.Dense(dim, activation="relu")(x)
             x = tf.keras.layers.Dropout(mlp_dropout)(x)
-        outputs = tf.keras.layers.Dense(1, activation="sigmoid")(x)
+        outputs = tf.keras.layers.Dense(1)(x)
         return tf.keras.Model(inputs, outputs)
     
     def train(self, train_x, train_y):
@@ -71,7 +71,7 @@ class TRANS_Model():
             epochs=200,
             batch_size=32,
             callbacks=callbacks,
-            verbose=0,
+            #verbose=0,
         )
     
     def predict(self, test_x):
