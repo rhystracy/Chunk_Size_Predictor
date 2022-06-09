@@ -69,7 +69,7 @@ class TRANS_Model():
             train_y,
             validation_split=0.2,
             epochs=200,
-            batch_size=32,
+            batch_size=128,
             callbacks=callbacks,
             #verbose=0,
         )
